@@ -11,13 +11,15 @@ from llama_index.core import StorageContext, load_index_from_storage
 
 
 
+#model_name="llama3.2"
+model_name="llama3.1:8b"
 def init_settings():
     # Settings control global defaults
     Settings.embed_model = OllamaEmbedding(
-        model_name="llama3.1:8b"
+        model_name=model_name
     )
     Settings.llm = Ollama(
-        model="llama3.1:8b",
+        model=model_name,
         request_timeout=360.0,
         # Manually set the context window to limit memory usage
         context_window=8000,
@@ -27,7 +29,9 @@ def init_settings():
 import logging
 logger = logging.getLogger("uvicorn")
 STORAGE_DIR = "storage"
+
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("llama_index.core.indices.utils").setLevel(logging.DEBUG)
 
 def get_index():
     # check if storage already exists
@@ -110,29 +114,7 @@ def create_workflow() -> AgentWorkflow:
         system_prompt=system_prompt,
     )
 
-def create_simple_workflow() -> AgentWorkflow:
-    load_dotenv()
-    init_settings()
-    index = get_index()
-    if index is None:
-        raise RuntimeError(
-            "Index not found! Please run `uv run generate` to index the data first."
-        )
-    # Create a query tool with citations enabled
-    query_tool = enable_citation(get_query_engine_tool(index=index))
-
-    # Define the system prompt for the agent
-    # Append the citation system prompt to the system prompt
-    system_prompt = """You are a helpful assistant"""
-    system_prompt += CITATION_SYSTEM_PROMPT
-
-    return AgentWorkflow.from_tools_or_functions(
-        tools_or_functions=[query_tool],
-        llm=Settings.llm,
-    )
-
 async def main():
-    #workflow = create_simple_workflow()
     workflow = create_workflow()
     # create context
     ctx = Context(workflow)
