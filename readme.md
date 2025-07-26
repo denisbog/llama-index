@@ -11,11 +11,7 @@ npx create-llama@latest
 ## run
 
 ```sh
-uv run generate.py
-uv run app.py
-
-# or
-
+pip install -r requirements.txt
 python generate.py
 python app.py
 ```
