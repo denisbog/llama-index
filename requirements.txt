@@ -2,3 +2,5 @@ dotenv
 llama_index
 llama_index.llms.ollama
 llama_index.embeddings.ollama
+llama_index.embeddings.huggingface
+llama_index.vector_stores.chroma

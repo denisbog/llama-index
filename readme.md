@@ -14,4 +14,12 @@ npx create-llama@latest
 pip install -r requirements.txt
 python generate.py
 python app.py
+
+```
+
+run with Chorma vector db
+
+```sh
+CHROMA_IDX=true python generate.py
+CHROMA_IDX=true python app.py
 ```

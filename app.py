@@ -4,20 +4,31 @@ from llama_index.core import Settings
 from llama_index.core.agent.workflow import AgentWorkflow
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 import os
 
 from llama_index.core.workflow import Context
 from llama_index.core import StorageContext, load_index_from_storage
 
-
-
+# working good enough, 42 seconds to generate respose
 #model_name="llama3.2"
-model_name="llama3.1:8b"
+# working better, includes citration, 142 seconds to generate respose
+#model_name="llama3.1:8b"
+
+is_chroma_index = None
+
 def init_settings():
+    model_name = os.getenv("MODEL", "llama3.2")
     # Settings control global defaults
-    Settings.embed_model = OllamaEmbedding(
-        model_name=model_name
-    )
+    if os.getenv("EMB", "HF") == "OLLAMA":
+        # not working good
+        Settings.embed_model = OllamaEmbedding(
+            model_name=model_name
+        )
+    else:
+        # works better
+        Settings.embed_model = HuggingFaceEmbedding("BAAI/bge-small-en-v1.5")
+
     Settings.llm = Ollama(
         model=model_name,
         request_timeout=360.0,
@@ -25,6 +36,8 @@ def init_settings():
         context_window=8000,
         temperature=0.1
     )
+    global is_chroma_index
+    is_chroma_index = os.getenv("CHROMA_IDX")
 
 import logging
 logger = logging.getLogger("uvicorn")
@@ -42,6 +55,19 @@ def get_index():
     storage_context = StorageContext.from_defaults(persist_dir=STORAGE_DIR)
     index = load_index_from_storage(storage_context)
     logger.info(f"Finished loading index from {STORAGE_DIR}")
+    return index
+
+CHROMA_DB_PATH = "./chroma_db"
+CHROMA_DB_COLLECTION = "documents"
+import chromadb
+from llama_index.core import VectorStoreIndex
+from llama_index.vector_stores.chroma import ChromaVectorStore
+def get_chroma_index():
+    db = chromadb.PersistentClient(path=CHROMA_DB_PATH)
+    chroma_collection = db.get_or_create_collection(CHROMA_DB_COLLECTION)
+    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+    index = VectorStoreIndex.from_vector_store(vector_store)
+    logger.info(f"Finished loading index from {CHROMA_DB_PATH}")
     return index
 
 from typing import Any, Optional
@@ -95,10 +121,15 @@ from dotenv import load_dotenv
 def create_workflow() -> AgentWorkflow:
     load_dotenv()
     init_settings()
-    index = get_index()
+
+    if is_chroma_index is None:
+        index = get_index()
+    else:
+        index = get_chroma_index()
+
     if index is None:
         raise RuntimeError(
-            "Index not found! Please run `uv run generate` to index the data first."
+            "Index not found! Please run `python generate.py` to index the data first."
         )
     # Create a query tool with citations enabled
     query_tool = enable_citation(get_query_engine_tool(index=index))
@@ -120,7 +151,7 @@ async def main():
     ctx = Context(workflow)
     # run agent with context
     # Run the agent
-    response = await workflow.run("who is the president of the united states", ctx=ctx)
+    response = await workflow.run("Changing the installation owner", ctx=ctx)
     print(str(response))
 
 # Run the agent
