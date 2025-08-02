@@ -16,8 +16,8 @@ Context information is below.
 ------------------
 {context_str}
 ------------------
-The context are multiple text chunks, each text chunk has its own citation_id at the beginning.
-Use the citation_id for citation construction.
+The context are multiple text chunks, each text chunk has its own citation_id, citation_file_path at the beginning.
+Use the citation_id, citation_file_path for citation construction.
 
 Answer the following query with citations:
 ------------------
@@ -27,21 +27,23 @@ Answer the following query with citations:
 ## Citation format
 
 [citation:id]
+[citation:file_path]
 
 Where:
-- [citation:] is a matching pattern which is required for all citations.
+- [citation id=, path=] is a matching pattern which is required for all citations.
 - `id` is the `citation_id` provided in the context or previous response.
+- `path` is the `citation_file_path` provided in the context or previous response.
 
 Example:
 ```
-    Here is a response that uses context information [citation:90ca859f-4f32-40ca-8cd0-edfad4fb298b] 
-    and other ideas that don't use context information [citation:17b2cc9a-27ae-4b6d-bede-5ca60fc00ff4] .\n
-    The citation block will be displayed automatically with useful information for the user in the UI [citation:1c606612-e75f-490e-8374-44e79f818d19] .
+    Here is a response that uses context information [citation id=90ca859f-4f32-40ca-8cd0-edfad4fb298b, path: /tmp/document/path/file.html]
+    and other ideas that don't use context information [citation id=17b2cc9a-27ae-4b6d-bede-5ca60fc00ff4, path: /tmp/document2/path/file.html] .\n
+    The citation block will be displayed automatically with useful information for the user in the UI [citation id=1c606612-e75f-490e-8374-44e79f818d19, path: /tmp/document/another path/file.html] .
 ```
 
 ## Requirements:
-1. Always include citations for every fact from the context information in your response. 
-2. Make sure that the citation_id is correct with the context, don't mix up the citation_id with other information.
+1. Always include citations for every fact from the context information in your response.
+2. Make sure that the citation_id citation_file_path is correct with the context, don't mix up the citation_id, citation_file_path with other information.
 
 Now, you answer the query with citations:
 """

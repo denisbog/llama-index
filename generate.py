@@ -13,6 +13,18 @@ from llama_index.core.indices import (
     VectorStoreIndex,
 )
 
+from llama_index.core.readers import SimpleDirectoryReader
+
+def load_custom_file_reader():
+    custom_file_reader_cls = SimpleDirectoryReader.supported_suffix_fn()
+    from llama_index.core.readers.base import BaseReader
+    from typing import Type
+    from llama_index.readers.file import  HTMLTagReader 
+    custom_file_reader_cls: dict[str, Type[BaseReader]] = {
+        ".htm": HTMLTagReader(tag='body'),
+    }
+    return custom_file_reader_cls
+
 def generate_index():
     """
     Index the documents in the data directory.
@@ -27,8 +39,11 @@ def generate_index():
     reader = SimpleDirectoryReader(
         os.environ.get("DATA_DIR", "data"),
         recursive=True,
+        file_extractor=load_custom_file_reader()
     )
     documents = reader.load_data()
+    for document in documents:
+        print(f'index document: {document.get_content()}')
     from app import is_chroma_index
     if is_chroma_index is None:
         get_index(documents)
