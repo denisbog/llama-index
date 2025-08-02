@@ -1,15 +1,14 @@
 import asyncio
 from llama_index.llms.ollama import Ollama
 from llama_index.core import Settings
-from llama_index.core.agent.workflow import AgentWorkflow
-from llama_index.llms.ollama import Ollama
+#from llama_index.core.agent.workflow import AgentWorkflow
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 import os
 
 from llama_index.core.workflow import Context
 from llama_index.core import StorageContext, load_index_from_storage
-
+from agent import AgentWorkflow
 # working good enough, 42 seconds to generate respose
 #model_name="llama3.2"
 # working better, includes citration, 142 seconds to generate respose
@@ -156,4 +155,4 @@ async def main():
 
 # Run the agent
 if __name__ == "__main__":
-    asyncio.run(main())
+   asyncio.run(main())

@@ -48,9 +48,9 @@ from llama_index.core.workflow import (
     step,
     WorkflowRuntimeError,
 )
-from llama_index.core.workflow.checkpointer import CheckpointCallback
-from llama_index.core.workflow.handler import WorkflowHandler
-from llama_index.core.workflow.workflow import WorkflowMeta
+from workflows.checkpointer import CheckpointCallback
+from workflows.handler import WorkflowHandler
+from workflows.workflow import WorkflowMeta
 from llama_index.core.settings import Settings
 
 
