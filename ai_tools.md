@@ -68,3 +68,36 @@ The political climate in Moldova has been marked by instability and a struggle b
 ## Conclusion
 Moldova's history, geography, and political climate reflect a nation at a crossroads, navigating its identity and future in a region influenced by both European and Russian interests.
 ```
+
+## dump request/response
+
+patch for httpx library. working when using async chat without streaming
+
+```diff
+diff --git a/httpx/_client.py b/httpx/_client.py
+index 13cd933..7b60a62 100644
+--- a/httpx/_client.py
++++ b/httpx/_client.py
+@@ -1612,6 +1612,10 @@ class AsyncClient(BaseClient):
+ 
+         [0]: /advanced/clients/#request-instances
+         """
++
++        import json
++        print(f">>>>> request:\n{request.method} {request.url}\n{json.dumps(dict(request.headers))}\n{request.content.decode()}")
++        print(f">>>>> request.done\n")
+         if self._state == ClientState.CLOSED:
+             raise RuntimeError("Cannot send a request, as the client has been closed.")
+ 
+@@ -1635,7 +1639,8 @@ class AsyncClient(BaseClient):
+         try:
+             if not stream:
+                 await response.aread()
+-
++            print(f"<<<<< response:\n{response._content.decode()}")
++            print(f"<<<<< repsonse.done\n")
+             return response
+ 
+         except BaseException as exc:
+
+```
